@@ -1,0 +1,228 @@
+"""
+CONCORD COMMUNITY QUICKAID DIRECTORY
+A community resource finder for Concord, NC residents
+"""
+
+import json
+import os
+from datetime import datetime
+
+# Service directory database
+SERVICES = {
+    "1": {
+        "name": "Duke Energy / City of Concord Electric",
+        "category": "Emergency",
+        "action": "Report outage or downed lines immediately.",
+        "phone": "1-800-769-3766",
+        "website": "www.duke-energy.com",
+        "hours": "24/7"
+    },
+    "2": {
+        "name": "Concord Water Resources",
+        "category": "Emergency",
+        "action": "Call for flooding, leaks, or water emergencies.",
+        "phone": "704-920-5300",
+        "website": "www.concordnc.gov",
+        "hours": "24/7"
+    },
+    "3": {
+        "name": "Cooperative Christian Ministry (CCM) Food Pantry",
+        "category": "Resources",
+        "action": "Free food, groceries, and crisis assistance in Concord.",
+        "address": "246 Country Club Dr NE, Concord, NC 28025",
+        "phone": "704-786-4709",
+        "website": "www.ccm-concord.org",
+        "hours": "Call for hours"
+    },
+    "4": {
+        "name": "Cabarrus County Animal Control",
+        "category": "Emergency",
+        "action": "Call for lost pets, strays, or wildlife issues.",
+        "phone": "704-920-3288",
+        "website": "www.cabarruscounty.us",
+        "hours": "Business hours"
+    },
+    "5": {
+        "name": "Concord Police Department (Non-Emergency)",
+        "category": "Emergency",
+        "action": "Non-emergency police services and reports.",
+        "phone": "704-920-5000",
+        "website": "www.concordpd.com",
+        "hours": "24/7",
+        "note": "Call 911 for emergencies"
+    },
+    "6": {
+        "name": "Concord Regional Hospital",
+        "category": "Medical",
+        "action": "Emergency room and medical services.",
+        "address": "910 Rocky River Rd, Concord, NC 28025",
+        "phone": "704-403-3000",
+        "website": "www.concordregionalhospital.com",
+        "hours": "24/7 Emergency Room"
+    },
+    "7": {
+        "name": "Cabarrus County Homeless Services",
+        "category": "Resources",
+        "action": "Emergency shelter, food, and case management.",
+        "phone": "704-920-3500",
+        "website": "www.cabarruscounty.us",
+        "hours": "Call for availability"
+    },
+    "8": {
+        "name": "Mental Health & Crisis Support",
+        "category": "Support",
+        "action": "Crisis counseling and mental health resources.",
+        "phone": "1-800-CALL-N.C. (1-800-235-5262)",
+        "website": "www.nami.org/nc",
+        "hours": "24/7"
+    }
+}
+
+def display_header():
+    """Display the main menu header"""
+    print("\n" + "="*55)
+    print("    CONCORD COMMUNITY QUICKAID DIRECTORY")
+    print("="*55)
+    print("\nSelect a service to get emergency contact information:\n")
+
+def display_menu():
+    """Display all available services"""
+    for key, service in SERVICES.items():
+        category = f"[{service['category']}]"
+        print(f"{key}. {service['name']} {category}")
+    print(f"\n{len(SERVICES) + 1}. View Saved Services")
+    print(f"{len(SERVICES) + 2}. Exit")
+
+def display_service(service_id):
+    """Display detailed information for a service"""
+    if service_id not in SERVICES:
+        print("\n❌ Invalid service ID. Please try again.")
+        return False
+    
+    service = SERVICES[service_id]
+    
+    print("\n" + "-"*55)
+    print(f"📋 SERVICE: {service['name']}")
+    print(f"   Category: {service['category']}")
+    print("-"*55)
+    
+    print(f"\n✓ Action: {service['action']}")
+    
+    if "phone" in service:
+        print(f"☎️  Phone: {service['phone']}")
+    
+    if "address" in service:
+        print(f"📍 Address: {service['address']}")
+    
+    if "website" in service:
+        print(f"🌐 Website: {service['website']}")
+    
+    if "hours" in service:
+        print(f"🕐 Hours: {service['hours']}")
+    
+    if "note" in service:
+        print(f"\n⚠️  Note: {service['note']}")
+    
+    print("-"*55)
+    return True
+
+def save_service(service_id, saved_file="saved_services.json"):
+    """Save a service to a local file"""
+    if service_id not in SERVICES:
+        print("❌ Invalid service ID.")
+        return False
+    
+    # Load existing saved services
+    saved = {}
+    if os.path.exists(saved_file):
+        try:
+            with open(saved_file, "r") as f:
+                saved = json.load(f)
+        except:
+            saved = {}
+    
+    # Add new service
+    service = SERVICES[service_id]
+    saved[service_id] = {
+        "service": service,
+        "saved_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    
+    # Save to file
+    with open(saved_file, "w") as f:
+        json.dump(saved, f, indent=2)
+    
+    print(f"✅ Saved '{service['name']}'!")
+    return True
+
+def view_saved_services(saved_file="saved_services.json"):
+    """Display all saved services"""
+    if not os.path.exists(saved_file):
+        print("\n📭 No saved services yet.")
+        return
+    
+    try:
+        with open(saved_file, "r") as f:
+            saved = json.load(f)
+    except:
+        print("\n⚠️  Could not read saved services.")
+        return
+    
+    if not saved:
+        print("\n📭 No saved services yet.")
+        return
+    
+    print("\n" + "="*55)
+    print("    SAVED SERVICES")
+    print("="*55)
+    
+    for service_id, data in saved.items():
+        service = data["service"]
+        saved_at = data["saved_at"]
+        print(f"\n• {service['name']}")
+        print(f"  ☎️  {service.get('phone', 'N/A')}")
+        print(f"  📌 Saved: {saved_at}")
+
+def main():
+    """Main program loop"""
+    print("\n🚀 Welcome to Concord QuickAid!")
+    
+    while True:
+        display_header()
+        display_menu()
+        
+        try:
+            choice = input("\nEnter your choice (1-8, 9, or 10): ").strip()
+            
+            # Handle special options
+            if choice == str(len(SERVICES) + 1):
+                view_saved_services()
+                input("\nPress Enter to continue...")
+                continue
+            
+            elif choice == str(len(SERVICES) + 2):
+                print("\n👋 Stay safe, Concord! Goodbye.\n")
+                break
+            
+            # Handle service selection
+            elif choice in SERVICES:
+                if display_service(choice):
+                    save_option = input("\n💾 Save this service? (yes/no): ").strip().lower()
+                    if save_option in ["yes", "y"]:
+                        save_service(choice)
+                
+                input("\nPress Enter to continue...")
+            
+            else:
+                print("\n❌ Invalid choice. Please select a valid option.")
+                input("Press Enter to try again...")
+        
+        except KeyboardInterrupt:
+            print("\n\n👋 Exiting QuickAid. Stay safe!\n")
+            break
+        except Exception as e:
+            print(f"\n⚠️  An error occurred: {e}")
+            input("Press Enter to try again...")
+
+if __name__ == "__main__":
+    main()
